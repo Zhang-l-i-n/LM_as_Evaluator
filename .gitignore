@@ -6,3 +6,5 @@
 .idea/modules.xml
 .idea/vcs.xml
 .DS_Store
+requirements.txt
+*.pyc
