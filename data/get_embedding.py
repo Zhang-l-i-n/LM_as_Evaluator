@@ -58,7 +58,7 @@ def data_prepare(f_raw, f_emb):
 
 
 if __name__ == '__main__':
-    f_raw, f_emb = './kaogang/physics.txt', './embedding/embedding_physics.json'
+    f_raw, f_emb = './taxonomy/physics.txt', './embedding/embedding_physics.json'
 
     ############
     print('data preparing...')
