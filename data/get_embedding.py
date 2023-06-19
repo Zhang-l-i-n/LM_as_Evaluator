@@ -17,36 +17,39 @@ def get_embedding(text, engine="ada-1"):
 
 def embeddings(f_txt):
     embedding_list = []
-    count = 0
-    with open(f_txt, 'r', encoding='utf-8') as frd:
-        for line in frd:
-            count = count + 1
-
-    pbar = tqdm(total=count)
-    with open(f_txt, 'r', encoding='utf-8') as f:
-        line = f.readline()
-        type = 0
-        while line:
-            if len(line) > 1:
-                if line.startswith('        '):
-                    level = 2
-                elif line.startswith('    '):
-                    level = 1
-                    type += 1
-                elif line.strip():
-                    level = 0
-                    type = 0
-                embedding_list.append(
-                    {"label": line.strip(),
-                     "level": level,
-                     "type": type,
-                     # "type": 1,
-                     "embedding": get_embedding(line)
-                     }
-                )
-            line = f.readline()
-            pbar.update(1)
-    pbar.close()
+    data_json = json.load(open(f_txt, 'r', encoding='utf-8'))
+    for i, d in enumerate(data_json):
+        print(d)
+    # count = 0
+    # with open(f_txt, 'r', encoding='utf-8') as frd:
+    #     for line in frd:
+    #         count = count + 1
+    #
+    # pbar = tqdm(total=count)
+    # with open(f_txt, 'r', encoding='utf-8') as f:
+    #     line = f.readline()
+    #     type = 0
+    #     while line:
+    #         if len(line) > 1:
+    #             if line.startswith('        '):
+    #                 level = 2
+    #             elif line.startswith('    '):
+    #                 level = 1
+    #                 type += 1
+    #             elif line.strip():
+    #                 level = 0
+    #                 type = 0
+    #             embedding_list.append(
+    #                 {"label": line.strip(),
+    #                  "level": level,
+    #                  "type": type,
+    #                  # "type": 1,
+    #                  "embedding": get_embedding(line)
+    #                  }
+    #             )
+    #         line = f.readline()
+    #         pbar.update(1)
+    # pbar.close()
 
     return embedding_list
 
@@ -58,7 +61,7 @@ def data_prepare(f_raw, f_emb):
 
 
 if __name__ == '__main__':
-    f_raw, f_emb = './taxonomy/physics.txt', './embedding/embedding_physics.json'
+    f_raw, f_emb = './taxonomy/history.json', './embedding/book_embedding_history.json'
 
     ############
     print('data preparing...')
