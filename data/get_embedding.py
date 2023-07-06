@@ -1,25 +1,55 @@
 import json
 import openai
-from tenacity import retry, wait_random_exponential, stop_after_attempt
+# from tenacity import retry, wait_random_exponential, stop_after_attempt
+import torch
+from transformers import BertTokenizer, BertModel
 from tqdm import tqdm
 
 
-openai.api_version = '2023-03-15-preview'
-openai.api_type = 'azure'
-openai.api_base = "https://conmmunity-openai.openai.azure.com/"
-openai.api_key = '3371b75d06a54deabcdd5818629ca833'
+# openai.api_version = '2023-03-15-preview'
+# openai.api_type = 'azure'
+# openai.api_base = "https://conmmunity-openai.openai.azure.com/"
+# openai.api_key = '3371b75d06a54deabcdd5818629ca833'
 
 
-@retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(6))
-def get_embedding(text, engine="ada-1"):
-    return openai.Embedding.create(engine=engine, input=[text])["data"][0]["embedding"]
+# @retry(wait=wait_random_exponential(min=1, max=20), stop=stop_after_attempt(6))
+# def get_embedding(text, engine="ada-1"):
+#     return openai.Embedding.create(engine=engine, input=[text])["data"][0]["embedding"]
+
+tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
+model = BertModel.from_pretrained('bert-base-chinese')
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+
+
+def get_embedding(text: str) -> list[float]:
+    inputs = tokenizer(text, return_tensors='pt')
+    outputs = model(**inputs)
+    return outputs.pooler_output.tolist()[0]
 
 
 def embeddings(f_txt):
     embedding_list = []
     data_json = json.load(open(f_txt, 'r', encoding='utf-8'))
     for i, d in enumerate(data_json):
-        print(d)
+        for k1 in d.values():
+            for k2 in k1.keys():
+                print(k2)
+                embedding_list.append(
+                    {"label": k2,
+                     "type": i + 1,
+                     "embedding": get_embedding(k2)
+                     }
+                )
+                for k3 in k1[k2]:
+                    print(k3)
+                    embedding_list.append(
+                        {"label": k3,
+                         "type": i + 1,
+                         "embedding": get_embedding(k3)
+                         }
+                    )
+
     # count = 0
     # with open(f_txt, 'r', encoding='utf-8') as frd:
     #     for line in frd:
@@ -61,7 +91,8 @@ def data_prepare(f_raw, f_emb):
 
 
 if __name__ == '__main__':
-    f_raw, f_emb = './taxonomy/history.json', './embedding/book_embedding_history.json'
+
+    f_raw, f_emb = './taxonomy/biography.json', './embedding/bert_embedding_biography.json'
 
     ############
     print('data preparing...')

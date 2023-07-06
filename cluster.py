@@ -3,7 +3,6 @@ import time
 
 import openai
 from scipy.cluster import hierarchy
-from tenacity import retry, wait_random_exponential, stop_after_attempt
 from tqdm import tqdm
 import numpy as np
 import umap.plot
@@ -30,10 +29,10 @@ def get_data(f_data, feature='level'):
 
 if __name__ == '__main__':
     plt.margins(0, 0)
-    class_name = 'geo'
-    f_emb = '/Users/zllll/Desktop/LM_as_Evaluator/data/embedding/embedding_geo.json'
+    class_name = 'bert_biography'
+    f_emb = './data/embedding/bert_embedding_history2.json'
 
-    font_path = '/Users/zllll/Library/Fonts/SimHei.ttf'
+    font_path = '/Users/zhanglin/Library/Fonts/SimHei.ttf'
     custom_font = FontProperties(fname=font_path)
 
     embedding_list, label_list, y_list = get_data(f_emb, 'type')
@@ -46,7 +45,7 @@ if __name__ == '__main__':
     ################
     # UMAP降维
     ################
-    reducer = umap.UMAP(random_state=42)
+    reducer = umap.UMAP(random_state=44)
     embedding = reducer.fit_transform(X)
 
     print(embedding.shape)
@@ -79,6 +78,9 @@ if __name__ == '__main__':
                     s=8,
                     c=col)
         plt.scatter(cluster_center[0], cluster_center[1], marker='x', s=100, c='black')
+        for i in range(len(label_list)):
+            if embedding[:, 0][i] == cluster_center[0] and embedding[:, 1][i] == cluster_center[1]:
+                print(label_list[i])
 
     for i in range(len(label_list)):
         plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
@@ -89,116 +91,116 @@ if __name__ == '__main__':
                 dpi=500)
     plt.show()
 
-    ################
-    # DBSCAN（UMAP降维后的数据）
-    ################
-    cluster = DBSCAN(min_samples=3).fit(embedding)
-    y_pred = cluster.labels_  # 获取训练后对象的每个样本的标签
-    clusters = {}
-    i = 0
-    for y in y_pred:
-        if y not in clusters:
-            clusters[y] = i
-            i += 1
-    color = sns.color_palette("hls", len(clusters))
-    for y in clusters.keys():
-        plt.scatter(embedding[y_pred == y, 0], embedding[y_pred == y, 1],
-                    marker='o',
-                    s=8,
-                    c=color[y])
-    for i in range(len(label_list)):
-        plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
-                 fontproperties=custom_font, fontsize=5)
-    plt.title('DBSCAN-after_reducer')
-    plt.savefig(class_name + '_a_DBSCAN_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
-                dpi=500)
-    plt.show()
-
-    ################
-    # Agglomerative（UMAP降维后的数据）
-    ################
-    cluster = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward').fit(embedding)
-    y_pred = cluster.labels_
-    plt.scatter(embedding[:,0],embedding[:,1], c=cluster.labels_, cmap='rainbow')
-    for i in range(len(label_list)):
-        plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
-                 fontproperties=custom_font, fontsize=5)
-    plt.title('Agglomerative-after_reducer')
-    plt.savefig(class_name + '_a_Agglomerative_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
-                dpi=500)
-    plt.show()
-    # # 绘制聚类树
-    # Z = hierarchy.linkage(cluster.children_, method='ward')
-    # fig = plt.figure(figsize=(10, 5))
-    # dn = hierarchy.dendrogram(Z)
+    # ################
+    # # DBSCAN（UMAP降维后的数据）
+    # ################
+    # cluster = DBSCAN(min_samples=3).fit(embedding)
+    # y_pred = cluster.labels_  # 获取训练后对象的每个样本的标签
+    # clusters = {}
+    # i = 0
+    # for y in y_pred:
+    #     if y not in clusters:
+    #         clusters[y] = i
+    #         i += 1
+    # color = sns.color_palette("hls", len(clusters))
+    # for y in clusters.keys():
+    #     plt.scatter(embedding[y_pred == y, 0], embedding[y_pred == y, 1],
+    #                 marker='o',
+    #                 s=8,
+    #                 c=color[y])
+    # for i in range(len(label_list)):
+    #     plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
+    #              fontproperties=custom_font, fontsize=5)
+    # plt.title('DBSCAN-after_reducer')
+    # plt.savefig(class_name + '_a_DBSCAN_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
+    #             dpi=500)
     # plt.show()
-
-    ################
-    # Affinity Propagation（UMAP降维前的数据）
-    ################
-    af = AffinityPropagation(preference=None).fit(X)
-    cluster_centers_indices = af.cluster_centers_indices_
-    labels = af.labels_
-    n_clusters = len(cluster_centers_indices)
-    # print(X.shape)
-    # print(cluster_centers_indices)
-    X_expand_2d = reducer.fit_transform(X)
-
-    color = sns.color_palette("hls", n_clusters)
-    for k, col in zip(range(n_clusters), color):
-        class_members = labels == k
-        cluster_center = X_expand_2d[cluster_centers_indices[k]]
-        plt.scatter(X_expand_2d[class_members, 0], X_expand_2d[class_members, 1],
-                    marker='o',
-                    s=8,
-                    c=col)
-        plt.scatter(cluster_center[0], cluster_center[1], marker='x', s=100, c='black')
-
-    for i in range(len(label_list)):
-        plt.text(X_expand_2d[:, 0][i], X_expand_2d[:, 1][i], label_list[i], ha='center', va='bottom',
-                 fontproperties=custom_font, fontsize=5)
-    plt.title('AP-before_reducer--clusters: %d' % n_clusters)
-    plt.savefig(class_name + '_b_AP_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
-                dpi=500)
-    plt.show()
-
-    ################
-    # DBSCAN（UMAP降维前的数据）
-    ################
-    cluster = DBSCAN(min_samples=3).fit(X)
-    embedding = reducer.fit_transform(X)
-    y_pred = cluster.labels_  # 获取训练后对象的每个样本的标签
-    clusters = {}
-    i = 0
-    for y in y_pred:
-        if y not in clusters:
-            clusters[y] = i
-            i += 1
-    color = sns.color_palette("hls", len(clusters))
-    for y in clusters.keys():
-        plt.scatter(embedding[y_pred == y, 0], embedding[y_pred == y, 1],
-                    marker='o',
-                    s=8,
-                    c=color[y])
-    for i in range(len(label_list)):
-        plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
-                 fontproperties=custom_font, fontsize=5)
-    plt.title('DBSCAN-before_reducer')
-    plt.savefig(class_name + '_b_DBSCAN_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
-                dpi=500)
-    plt.show()
-
-    ################
-    # Agglomerative（UMAP降维前的数据）
-    ################
-    cluster = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward').fit(X)
-    embedding = reducer.fit_transform(X)
-    y_pred = cluster.labels_
-    plt.scatter(embedding[:,0],embedding[:,1], c=cluster.labels_, cmap='rainbow')
-    for i in range(len(label_list)):
-        plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
-                 fontproperties=custom_font, fontsize=5)
-    plt.title('Agglomerative-before_reducer')
-    plt.savefig(class_name + '_b_Agglomerative_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
-                dpi=500)
-    plt.show()
+    #
+    # ################
+    # # Agglomerative（UMAP降维后的数据）
+    # ################
+    # cluster = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward').fit(embedding)
+    # y_pred = cluster.labels_
+    # plt.scatter(embedding[:,0],embedding[:,1], c=cluster.labels_, cmap='rainbow')
+    # for i in range(len(label_list)):
+    #     plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
+    #              fontproperties=custom_font, fontsize=5)
+    # plt.title('Agglomerative-after_reducer')
+    # plt.savefig(class_name + '_a_Agglomerative_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
+    #             dpi=500)
+    # plt.show()
+    # # # 绘制聚类树
+    # # Z = hierarchy.linkage(cluster.children_, method='ward')
+    # # fig = plt.figure(figsize=(10, 5))
+    # # dn = hierarchy.dendrogram(Z)
+    # # plt.show()
+    #
+    # ################
+    # # Affinity Propagation（UMAP降维前的数据）
+    # ################
+    # af = AffinityPropagation(preference=None).fit(X)
+    # cluster_centers_indices = af.cluster_centers_indices_
+    # labels = af.labels_
+    # n_clusters = len(cluster_centers_indices)
+    # # print(X.shape)
+    # # print(cluster_centers_indices)
+    # X_expand_2d = reducer.fit_transform(X)
+    #
+    # color = sns.color_palette("hls", n_clusters)
+    # for k, col in zip(range(n_clusters), color):
+    #     class_members = labels == k
+    #     cluster_center = X_expand_2d[cluster_centers_indices[k]]
+    #     plt.scatter(X_expand_2d[class_members, 0], X_expand_2d[class_members, 1],
+    #                 marker='o',
+    #                 s=8,
+    #                 c=col)
+    #     plt.scatter(cluster_center[0], cluster_center[1], marker='x', s=100, c='black')
+    #
+    # for i in range(len(label_list)):
+    #     plt.text(X_expand_2d[:, 0][i], X_expand_2d[:, 1][i], label_list[i], ha='center', va='bottom',
+    #              fontproperties=custom_font, fontsize=5)
+    # plt.title('AP-before_reducer--clusters: %d' % n_clusters)
+    # plt.savefig(class_name + '_b_AP_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
+    #             dpi=500)
+    # plt.show()
+    #
+    # ################
+    # # DBSCAN（UMAP降维前的数据）
+    # ################
+    # cluster = DBSCAN(min_samples=3).fit(X)
+    # embedding = reducer.fit_transform(X)
+    # y_pred = cluster.labels_  # 获取训练后对象的每个样本的标签
+    # clusters = {}
+    # i = 0
+    # for y in y_pred:
+    #     if y not in clusters:
+    #         clusters[y] = i
+    #         i += 1
+    # color = sns.color_palette("hls", len(clusters))
+    # for y in clusters.keys():
+    #     plt.scatter(embedding[y_pred == y, 0], embedding[y_pred == y, 1],
+    #                 marker='o',
+    #                 s=8,
+    #                 c=color[y])
+    # for i in range(len(label_list)):
+    #     plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
+    #              fontproperties=custom_font, fontsize=5)
+    # plt.title('DBSCAN-before_reducer')
+    # plt.savefig(class_name + '_b_DBSCAN_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
+    #             dpi=500)
+    # plt.show()
+    #
+    # ################
+    # # Agglomerative（UMAP降维前的数据）
+    # ################
+    # cluster = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward').fit(X)
+    # embedding = reducer.fit_transform(X)
+    # y_pred = cluster.labels_
+    # plt.scatter(embedding[:,0],embedding[:,1], c=cluster.labels_, cmap='rainbow')
+    # for i in range(len(label_list)):
+    #     plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
+    #              fontproperties=custom_font, fontsize=5)
+    # plt.title('Agglomerative-before_reducer')
+    # plt.savefig(class_name + '_b_Agglomerative_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
+    #             dpi=500)
+    # plt.show()
