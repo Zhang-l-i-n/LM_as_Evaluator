@@ -1,7 +1,7 @@
 import json
 import time
 
-from openai_api import call_openai_api
+from utils.openai_api import call_openai_api
 
 
 def get_question(keyword_list, question_list, fin):
@@ -30,7 +30,7 @@ def get_question(keyword_list, question_list, fin):
 
 
 if __name__ == '__main__':
-    fq = open(r"./result/question/history_question_candidates_filtered.txt", "r", encoding="utf-8")
+    fq = open(r"../result/question/history_question_candidates_filtered.txt", "r", encoding="utf-8")
     l = fq.readline()
     k_list, t_list, q_list = [], [], []
     while l.strip():
@@ -41,5 +41,5 @@ if __name__ == '__main__':
     # 生成答案
     fw = r"./result/question/answer_history_gpt35/answer.txt"
     fin = open(fw, 'a', encoding='utf-8')
-    get_question(k_list[31:], q_list[31:], fin)
+    get_question(k_list[:], q_list[:], fin)
     fin.close()

@@ -2,7 +2,7 @@
 # Note: The openai-python library support for Azure OpenAI is in preview.
 import json
 import time
-from openai_api import call_openai_api
+from utils.openai_api import call_openai_api
 
 
 #######################
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
     # 需要手工筛选一下
 
-    fq = open(r"./result/question/history_question_candidates_filtered.txt", "r", encoding="utf-8")
+    fq = open(r"../result/question/history_question_candidates_filtered.txt", "r", encoding="utf-8")
     l = fq.readline()
     k_list, t_list, q_list = [], [], []
     while l.strip():

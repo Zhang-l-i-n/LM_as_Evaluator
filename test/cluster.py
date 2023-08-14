@@ -20,6 +20,7 @@ def get_data(f_data, feature='level'):
     embedding_list, label_list, y_list = [], [], []
     data_json = json.load(open(f_data, 'r', encoding='utf-8'))
     for d in data_json:
+        # if d[feature] == 2:
         embedding_list.append(d['embedding'])
         label_list.append(d['label'])
         y_list.append(d[feature])
@@ -30,7 +31,7 @@ def get_data(f_data, feature='level'):
 if __name__ == '__main__':
     plt.margins(0, 0)
     class_name = 'bert_biography'
-    f_emb = './data/embedding/bert_embedding_history2.json'
+    f_emb = '../data/embedding/chinese-roberta-wwm-ext-large_eb_history2.json'
 
     font_path = '/Users/zhanglin/Library/Fonts/SimHei.ttf'
     custom_font = FontProperties(fname=font_path)
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     ################
     # UMAP降维
     ################
-    reducer = umap.UMAP(random_state=44)
+    reducer = umap.UMAP(random_state=60)
     embedding = reducer.fit_transform(X)
 
     print(embedding.shape)
@@ -54,42 +55,42 @@ if __name__ == '__main__':
     # 添加标签
     for i in range(len(label_list)):
         plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
-                 fontproperties=custom_font, fontsize=5)
+                 fontproperties=custom_font, fontsize=12)
 
     plt.gca().set_aspect('equal', 'datalim')
-    plt.title('UMAP')
+    plt.title('')
     plt.savefig(class_name + '_a_UMAP_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
                 dpi=500)
     plt.show()
     ################
     # Affinity Propagation（降维后的数据）
     ################
-    af = AffinityPropagation(preference=None).fit(embedding)
-    cluster_centers_indices = af.cluster_centers_indices_
-    labels = af.labels_
-    n_clusters = len(cluster_centers_indices)
-
-    color = sns.color_palette("hls", n_clusters)
-    for k, col in zip(range(n_clusters), color):
-        class_members = labels == k
-        cluster_center = embedding[cluster_centers_indices[k]]
-        plt.scatter(embedding[class_members, 0], embedding[class_members, 1],
-                    marker='o',
-                    s=8,
-                    c=col)
-        plt.scatter(cluster_center[0], cluster_center[1], marker='x', s=100, c='black')
-        for i in range(len(label_list)):
-            if embedding[:, 0][i] == cluster_center[0] and embedding[:, 1][i] == cluster_center[1]:
-                print(label_list[i])
-
-    for i in range(len(label_list)):
-        plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
-                 fontproperties=custom_font, fontsize=5)
-
-    plt.title('AP-after_reducer--clusters: %d' % n_clusters)
-    plt.savefig(class_name + '_a_AP_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
-                dpi=500)
-    plt.show()
+    # af = AffinityPropagation(preference=None).fit(embedding)
+    # cluster_centers_indices = af.cluster_centers_indices_
+    # labels = af.labels_
+    # n_clusters = len(cluster_centers_indices)
+    #
+    # color = sns.color_palette("hls", n_clusters)
+    # for k, col in zip(range(n_clusters), color):
+    #     class_members = labels == k
+    #     cluster_center = embedding[cluster_centers_indices[k]]
+    #     plt.scatter(embedding[class_members, 0], embedding[class_members, 1],
+    #                 marker='o',
+    #                 s=8,
+    #                 c=col)
+    #     plt.scatter(cluster_center[0], cluster_center[1], marker='x', s=100, c='black')
+    #     for i in range(len(label_list)):
+    #         if embedding[:, 0][i] == cluster_center[0] and embedding[:, 1][i] == cluster_center[1]:
+    #             print(label_list[i])
+    #
+    # for i in range(len(label_list)):
+    #     plt.text(embedding[:, 0][i], embedding[:, 1][i], label_list[i], ha='center', va='bottom',
+    #              fontproperties=custom_font, fontsize=5)
+    #
+    # plt.title('AP-after_reducer--clusters: %d' % n_clusters)
+    # plt.savefig(class_name + '_a_AP_fig-time{}.png'.format(time.strftime("%Y%m%d-%H%M", time.localtime())),
+    #             dpi=500)
+    # plt.show()
 
     # ################
     # # DBSCAN（UMAP降维后的数据）

@@ -48,6 +48,6 @@ def gen_file_gptscore(ref_file, answer_file, out_file):
     fw.close()
 
 
-gen_file_gptscore('history_questions_ref_answers_all.txt', '../result/question/answer_history_gpt35/answer.txt', 'data_for_gpt35.json')
+gen_file_gptscore('../data/question/history_questions_ref_answers_all.txt', '../result/question/answer_history_gpt35/answer.txt', 'data_for_gpt35.json')
 
 

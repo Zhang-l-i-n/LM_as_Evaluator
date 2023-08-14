@@ -5,6 +5,7 @@ import torch
 overall_instruction = "你是复旦大学知识工场实验室训练出来的语言模型CuteGPT。给定任务描述，请给出对应请求的回答。\n"
 device = torch.device("cuda:0")
 
+
 def call_cutegpt(prompt, model, tokenizer):
     prompt = overall_instruction + "问：{}\n答：".format(prompt)
     print(prompt)
@@ -59,5 +60,4 @@ if __name__ == '__main__':
                 "key": key,
                 "question": question,
                 "answer": answer
-            },ensure_ascii=False))
-
+            }, ensure_ascii=False))
