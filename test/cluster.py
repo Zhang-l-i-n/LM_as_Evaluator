@@ -30,8 +30,8 @@ def get_data(f_data, feature='level'):
 
 if __name__ == '__main__':
     plt.margins(0, 0)
-    class_name = 'bert_biography'
-    f_emb = '../data/embedding/chinese-roberta-wwm-ext-large_eb_history2.json'
+    class_name = 'roberta_history'
+    f_emb = '../data/embedding/chinese-roberta-wwm-ext-large_eb_history_0814.json'
 
     font_path = '/Users/zhanglin/Library/Fonts/SimHei.ttf'
     custom_font = FontProperties(fname=font_path)
