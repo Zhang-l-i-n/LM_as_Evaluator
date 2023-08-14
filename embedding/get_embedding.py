@@ -33,22 +33,28 @@ def embeddings(f_txt):
     for i, d in enumerate(data_json):
         for k1 in d.keys():
             print(k1)
+            embedding_list.append(
+                {"label": k1,
+                 "type": i + 1,
+                 "embedding": get_embedding(k2)
+                 }
+            )
             for k2 in d[k1].keys():
                 print(k2)
-                # embedding_list.append(
-                #     {"label": k2,
-                #      "type": i + 1,
-                #      "embedding": get_embedding(k2)
-                #      }
-                # )
+                embedding_list.append(
+                    {"label": k2,
+                     "type": i + 1,
+                     "embedding": get_embedding(k2)
+                     }
+                )
                 for k3 in d[k1][k2]:
                     print(k3)
-                    # embedding_list.append(
-                    #     {"label": k3,
-                    #      "type": i + 1,
-                    #      "embedding": get_embedding(k3)
-                    #      }
-                    # )
+                    embedding_list.append(
+                        {"label": k3,
+                         "type": i + 1,
+                         "embedding": get_embedding(k3)
+                         }
+                    )
 
     # count = 0
     # with open(f_txt, 'r', encoding='utf-8') as frd:
@@ -91,7 +97,7 @@ def data_prepare(f_raw, f_emb):
 
 
 if __name__ == '__main__':
-    f_raw, f_emb = './taxonomy/history2.json', './embedding/bert_embedding_biography.json'
+    f_raw, f_emb = './taxonomy/history.json', './embedding/bert_embedding_history.json'
 
     ############
     print('data preparing...')
